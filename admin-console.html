@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>涛子控制台 · 通用后台模板</title>
+<style>
+:root{
+  --paper:#f2ead7; --sheet:#fffcf2; --ink:#1c1a17;
+  --red:#d93a2b; --amber:#e8a317; --green:#2f7d4f;
+  --muted:#6b6252; --line:#d9cdb0;
+  --mono:"Courier New","IBM Plex Mono",ui-monospace,monospace;
+  --sans:"PingFang SC","Microsoft YaHei","Heiti SC",sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{
+  font-family:var(--sans);color:var(--ink);background-color:var(--paper);
+  background-image:linear-gradient(to right,rgba(28,26,23,.05) 1px,transparent 1px),
+                   linear-gradient(to bottom,rgba(28,26,23,.05) 1px,transparent 1px);
+  background-size:22px 22px;min-height:100vh;
+}
+button,input,select,textarea{font-family:inherit}
+button{cursor:pointer}
+a{color:inherit}
+a.btn{display:inline-block;text-decoration:none}
+
+/* ---------- 通用零件 ---------- */
+.btn{
+  font-size:12px;font-weight:800;letter-spacing:.06em;color:var(--ink);
+  background:var(--sheet);border:2px solid var(--ink);border-radius:0;
+  padding:8px 13px;box-shadow:3px 3px 0 var(--ink);white-space:nowrap;
+}
+.btn:hover{background:#f2e8cf}
+.btn:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--ink)}
+.btn.primary{background:var(--red);color:#fff}
+.btn.primary:hover{background:#c43326}
+.btn.small{padding:4px 8px;font-size:11px;box-shadow:2px 2px 0 var(--ink)}
+.btn.ghost{background:transparent;box-shadow:none;border-width:1px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.tag{
+  display:inline-block;font-family:var(--mono);font-size:10px;font-weight:700;
+  padding:2px 6px;border:1px solid var(--ink);white-space:nowrap;
+}
+.tag.on{background:var(--green);color:#fff;border-color:var(--ink)}
+.tag.off{background:#e6dcc4;color:var(--muted)}
+.tag.warn{background:var(--amber);color:var(--ink)}
+.tag.red{background:var(--red);color:#fff}
+.card{background:var(--sheet);border:2px solid var(--ink);box-shadow:5px 5px 0 var(--ink)}
+.card-h{
+  border-bottom:2px solid var(--ink);padding:11px 14px;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+}
+.card-h h3{margin:0;font-size:14px;font-weight:900;letter-spacing:.04em}
+.card-b{padding:14px}
+.muted{color:var(--muted)}
+.mono{font-family:var(--mono)}
+.hint{font-size:11px;font-family:var(--mono);color:var(--muted);line-height:1.7}
+.field{margin-bottom:12px}
+.field label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--muted);margin-bottom:5px}
+.field input,.field select,.field textarea{
+  width:100%;background:#fff;border:1px solid var(--ink);border-radius:0;
+  padding:8px 10px;font-size:13px;color:var(--ink);outline:none;
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--red);box-shadow:2px 2px 0 var(--red)}
+.field textarea{min-height:82px;resize:vertical}
+.field .req{color:var(--red)}
+.switch{display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer}
+.switch input{width:16px;height:16px;accent-color:var(--red)}
+.err{color:var(--red);font-size:11px;font-family:var(--mono);min-height:15px}
+.empty{padding:26px;text-align:center;font-family:var(--mono);font-size:12px;color:var(--muted)}
+
+/* ---------- 登录 ---------- */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.login{width:min(420px,100%);background:var(--sheet);border:2px solid var(--ink);box-shadow:10px 10px 0 var(--ink)}
+.login .top{background:var(--ink);color:var(--sheet);font-family:var(--mono);font-size:10px;letter-spacing:.2em;padding:7px 14px;display:flex;justify-content:space-between}
+.login .body{padding:24px}
+.login h1{margin:0;font-size:28px;font-weight:900;letter-spacing:-.02em}
+.login .en{font-family:var(--mono);font-size:10px;letter-spacing:.28em;color:var(--red);margin-top:6px}
+.login .mark{width:10px;height:30px;background:var(--red);display:inline-block;margin-right:10px;vertical-align:-6px}
+.login .demo{margin-top:16px;border-top:1px dashed var(--line);padding-top:12px}
+
+/* ---------- 主框架 ---------- */
+.shell{display:grid;grid-template-columns:222px 1fr;min-height:100vh}
+.sidebar{background:var(--sheet);border-right:2px solid var(--ink);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:auto}
+.brand{background:var(--ink);color:var(--sheet);padding:13px 14px}
+.brand b{display:block;font-size:15px;letter-spacing:.02em}
+.brand span{font-family:var(--mono);font-size:9px;letter-spacing:.2em;color:var(--amber)}
+.nav-group{font-family:var(--mono);font-size:9px;letter-spacing:.22em;color:var(--muted);padding:14px 14px 6px}
+.nav-item{
+  display:flex;align-items:center;gap:9px;width:100%;text-align:left;
+  background:transparent;border:none;border-left:4px solid transparent;
+  padding:9px 12px;font-size:12.5px;font-weight:700;color:var(--ink);
+}
+.nav-item .ic{font-family:var(--mono);width:16px;text-align:center;font-size:13px}
+.nav-item:hover{background:#f2e8cf}
+.nav-item.cur{background:var(--ink);color:#fff;border-left-color:var(--red)}
+.nav-item .dot{margin-left:auto;font-family:var(--mono);font-size:9px;background:var(--red);color:#fff;padding:1px 5px}
+.side-foot{margin-top:auto;border-top:2px solid var(--ink);padding:12px 14px;font-family:var(--mono);font-size:9.5px;line-height:1.8;color:var(--muted)}
+.main-col{min-width:0;display:flex;flex-direction:column}
+.topbar{
+  background:var(--sheet);border-bottom:2px solid var(--ink);padding:10px 18px;
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:5;
+}
+.crumb{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--muted)}
+.crumb b{color:var(--ink)}
+.top-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.who{font-family:var(--mono);font-size:11px;border:1px solid var(--ink);padding:4px 8px;background:#f7efd9}
+.burger{display:none}
+.main{padding:18px;flex:1;min-width:0}
+.page-h{margin-bottom:16px}
+.page-h h2{margin:0;font-size:22px;font-weight:900;letter-spacing:-.01em}
+.page-h p{margin:5px 0 0;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.grid{display:grid;gap:14px}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g21{grid-template-columns:1.4fr 1fr}
+.stat{padding:14px}
+.stat .lb{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;color:var(--muted)}
+.stat .num{font-family:var(--mono);font-size:clamp(22px,4vw,32px);font-weight:700;line-height:1.25;margin-top:6px}
+.stat .sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:4px}
+.stat .num.red{color:var(--red)}
+.chart{width:100%;height:auto;display:block}
+.list-row{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px dashed var(--line);font-size:12px}
+.list-row:last-child{border-bottom:none}
+.list-row .t{font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap}
+
+/* ---------- 表格 ---------- */
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.search{
+  border:1px solid var(--ink);background:#fff;padding:7px 9px;font-size:12px;
+  min-width:190px;outline:none;border-radius:0;
+}
+.search:focus{border-color:var(--red);box-shadow:2px 2px 0 var(--red)}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{
+  background:#efe4c8;border-bottom:2px solid var(--ink);text-align:left;
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;padding:9px 10px;white-space:nowrap;
+}
+th.sortable{cursor:pointer;user-select:none}
+th.sortable:hover{background:#e6d8b6}
+td{padding:8px 10px;border-bottom:1px solid #e5d9bc;white-space:nowrap}
+tbody tr:hover{background:#faf3df}
+td.num,th.num{font-family:var(--mono);text-align:right}
+td.act{text-align:right}
+.rowchk{width:14px;height:14px;accent-color:var(--red)}
+.pager{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:11px 14px;border-top:2px solid var(--ink);font-family:var(--mono);font-size:11px;flex-wrap:wrap}
+.pager .info{margin-right:auto;color:var(--muted)}
+.matrix td,.matrix th{text-align:center}
+.matrix td:first-child,.matrix th:first-child{text-align:left}
+.notice{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-bottom:1px dashed var(--line)}
+.notice:last-child{border-bottom:none}
+.notice.unread{background:#fff6dc}
+.notice .bd{flex:1;min-width:0}
+.notice .tt{font-size:13px;font-weight:800}
+.notice .tx{font-size:11.5px;color:var(--muted);margin-top:4px;line-height:1.6}
+.faq{border-bottom:1px dashed var(--line);padding:10px 0}
+.faq summary{cursor:pointer;font-size:13px;font-weight:800}
+.faq p{margin:8px 0 0;font-size:12px;line-height:1.8;color:var(--muted)}
+.quick{display:flex;flex-wrap:wrap;gap:8px}
+.compact .grid{gap:9px}
+.compact .card-h{padding:8px 12px}
+.compact .card-b{padding:10px}
+.compact td{padding:5px 8px}
+.compact .stat{padding:10px}
+.compact .notice{padding:8px 12px}
+
+/* ---------- 浮层 ---------- */
+.mask{position:fixed;inset:0;background:rgba(28,26,23,.55);z-index:20;display:flex;align-items:center;justify-content:center;padding:18px}
+.modal{width:min(480px,100%);max-height:88vh;overflow:auto;background:var(--sheet);border:2px solid var(--ink);box-shadow:9px 9px 0 var(--ink)}
+.modal .mh{background:var(--ink);color:#fff;padding:11px 14px;font-size:13px;font-weight:800;display:flex;justify-content:space-between;align-items:center}
+.modal .mh button{background:none;border:none;color:#fff;font-size:18px;line-height:1;padding:0 2px}
+.modal .mb{padding:16px}
+.modal .mf{border-top:2px solid var(--ink);padding:12px 16px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+#toastHost{position:fixed;right:18px;top:16px;z-index:40;display:flex;flex-direction:column;gap:8px}
+.toast{
+  background:var(--ink);color:#fff;border-left:5px solid var(--red);
+  padding:10px 14px;font-size:12px;font-family:var(--mono);
+  box-shadow:4px 4px 0 rgba(28,26,23,.35);max-width:320px;
+  animation:tin .2s ease-out;
+}
+@keyframes tin{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+
+@media(max-width:980px){
+  .g4{grid-template-columns:repeat(2,1fr)}
+  .g21,.g2{grid-template-columns:1fr}
+}
+@media(max-width:860px){
+  .shell{display:block}
+  .burger{display:inline-block}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;width:230px;z-index:15;transform:translateX(-102%);transition:transform .2s}
+  .sidebar.open{transform:none}
+  .main{padding:12px}
+  .topbar{padding:9px 12px}
+}
+@media(max-width:520px){
+  .g4{grid-template-columns:1fr}
+  .card-h{padding:10px}
+  .card-b{padding:11px}
+  .page-h h2{font-size:19px}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toastHost"></div>
+<div id="modalHost"></div>
+<script>
+(function(){
+'use strict';
+
+/* ================= 数据 ================= */
+const KEY = 'taozi_console_v2';
+const NAMES = ['陈一','林二','王三','赵四','李五','周小满','吴桐','郑和','孙七','钱八','冯九','蒋十','许清','何川','吕梁','施宁','张弛','孔亮','曹颖','严冬','华安','金晓','魏然','陶然'];
+const DEPTS = ['技术部','产品部','运营部','市场部','财务部'];
+const ROLES = ['超级管理员','编辑','只读'];
+const CATS = ['采购','报销','订阅','服务','其他'];
+const STS = ['已完成','处理中','待审核','已驳回'];
+const TITLES = ['服务器扩容','月度物料采购','客户合同续签','差旅费用报销','域名续费','设计外包结算','数据报表导出','权限变更申请','用户反馈处理','活动物料制作'];
+
+function seed(){
+  const users = NAMES.map((n,i)=>({
+    id:i+1, name:n, email:'user'+(i+1)+'@example.com',
+    role: i===0?'超级管理员':ROLES[i%3], dept:DEPTS[i%5],
+    status: i%7===0?'停用':'启用',
+    created:'2026-'+String(9+(i%2)).padStart(2,'0')+'-'+String(1+(i%27)).padStart(2,'0')
+  }));
+  const records = [];
+  for(let i=0;i<34;i++){
+    records.push({
+      id:i+1, title:TITLES[i%TITLES.length]+' #'+(i+1),
+      cat:CATS[i%CATS.length], owner:(i%5===0?'林小满':NAMES[i%NAMES.length]),
+      amount: 200 + (i*137)%4800, status:STS[i%STS.length],
+      date:'2026-11-'+String(1+(i%6)).padStart(2,'0')
+    });
+  }
+  const permKeys = ['dashboard','users','records','roles','forms','notices','logs','settings'];
+  const roles = [
+    {id:1,name:'超级管理员',desc:'拥有全部模块权限',perms:permKeys.reduce((o,k)=>(o[k]=true,o),{})},
+    {id:2,name:'编辑',desc:'可查看与编辑业务数据',perms:{dashboard:true,users:true,records:true,roles:false,forms:true,notices:true,logs:false,settings:false}},
+    {id:3,name:'只读',desc:'仅可查看，不可修改',perms:{dashboard:true,users:true,records:true,roles:false,forms:false,notices:true,logs:false,settings:false}}
+  ];
+  const notices = [
+    {id:1,title:'系统升级完成',body:'控制台已更新至 v1.2，新增数据导出与权限矩阵。',time:'2026-11-06 09:12',read:false,target:'all'},
+    {id:2,title:'待审核提醒',body:'有 4 条记录等待你处理，请前往「数据记录」查看。',time:'2026-11-05 17:40',read:false,target:'admin'},
+    {id:3,title:'月度报表已生成',body:'10 月统计报表可以在仪表盘查看趋势图。',time:'2026-11-04 11:05',read:true,target:'all'},
+    {id:4,title:'账号安全提示',body:'建议定期修改密码，不要在公共设备保存登录状态。',time:'2026-11-02 08:30',read:false,target:'all'},
+    {id:5,title:'欢迎使用',body:'这是一套纯前端演示模板，所有数据保存在浏览器本地。',time:'2026-11-01 10:00',read:true,target:'all'}
+  ];
+  const logs = [
+    {id:1,time:'2026-11-06 09:10',actor:'系统',action:'初始化',detail:'载入演示数据'},
+    {id:2,time:'2026-11-06 09:12',actor:'admin',action:'登录',detail:'管理员登录控制台'},
+    {id:3,time:'2026-11-06 09:15',actor:'admin',action:'编辑',detail:'修改用户资料'}
+  ];
+  return {
+    users, records, roles, notices, logs,
+    settings:{siteName:'涛子控制台',pageSize:8,accent:'#d93a2b',compact:false},
+    prefs:{news:true,digest:false,compact:false},
+    profile:{name:'林小满',email:'lin@example.com',phone:'13800000000',bio:'演示账号，用于体验客户端面板。'},
+    session:null, seq:100
+  };
+}
+function load(){
+  try{ const raw = localStorage.getItem(KEY); if(raw){ const d = JSON.parse(raw); if(d && d.users){ if(!d.prefs) d.prefs={news:true,digest:false,compact:false}; return d; } } }catch(e){}
+  return seed();
+}
+let DB = load();
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(DB)); }catch(e){} }
+function nextId(){ DB.seq += 1; return DB.seq; }
+function resetData(){ DB = seed(); save(); }
+function addLog(action, detail){
+  DB.logs.unshift({id:nextId(),time:stamp(),actor:(DB.session&&DB.session.user)||'系统',action,detail});
+  if(DB.logs.length>80) DB.logs.length=80;
+  save();
+}
+function stamp(){
+  const d=new Date(), p=n=>String(n).padStart(2,'0');
+  return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());
+}
+
+/* ================= 工具 ================= */
+const $ = s => document.querySelector(s);
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function money(n){ return '¥'+Number(n||0).toLocaleString('zh-CN'); }
+function toast(msg){
+  const host = $('#toastHost'); if(!host) return;
+  const el = document.createElement('div'); el.className='toast'; el.textContent=msg;
+  host.appendChild(el); setTimeout(()=>el.remove(), 2600);
+}
+function modal(title, body, footer){
+  const host = $('#modalHost'); if(!host) return;
+  host.innerHTML = '<div class="mask" data-action="mask"><div class="modal">'+
+    '<div class="mh"><span>'+esc(title)+'</span><button data-action="modal-close" aria-label="关闭">×</button></div>'+
+    '<div class="mb">'+body+'</div>'+
+    (footer?'<div class="mf">'+footer+'</div>':'')+'</div></div>';
+}
+function closeModal(){ const h=$('#modalHost'); if(h) h.innerHTML=''; }
+function confirmBox(title, text, onYes, label){
+  modal(title,'<p style="font-size:13px;line-height:1.8;margin:0">'+esc(text)+'</p>',
+    '<button class="btn" data-action="modal-close">取消</button>'+
+    '<button class="btn primary" data-action="confirm-yes">'+esc(label||'确定')+'</button>');
+  PENDING = onYes;
+}
+let PENDING = null;
+
+/* ================= 导航配置 ================= */
+const MENU = {
+  admin:[
+    {g:'总览',items:[{v:'dashboard',t:'仪表盘',i:'▦'}]},
+    {g:'业务管理',items:[{v:'users',t:'用户管理',i:'☰'},{v:'records',t:'数据记录',i:'▤'},{v:'roles',t:'角色权限',i:'⌘'}]},
+    {g:'组件与消息',items:[{v:'forms',t:'表单组件',i:'✎'},{v:'notices',t:'通知中心',i:'✉'}]},
+    {g:'系统',items:[{v:'logs',t:'操作日志',i:'≡'},{v:'settings',t:'站点设置',i:'⚙'}]}
+  ],
+  client:[
+    {g:'我的',items:[{v:'home',t:'我的首页',i:'▦'},{v:'profile',t:'我的资料',i:'☰'}]},
+    {g:'业务',items:[{v:'myrecords',t:'我的记录',i:'▤'},{v:'mynotices',t:'我的消息',i:'✉'}]},
+    {g:'支持',items:[{v:'help',t:'帮助与偏好',i:'?'}]}
+  ]
+};
+const TITLES_MAP = {};
+for(const r of ['admin','client']) for(const g of MENU[r]) for(const it of g.items) TITLES_MAP[it.v]=it.t;
+const PERM_LABELS = {dashboard:'仪表盘',users:'用户管理',records:'数据记录',roles:'角色权限',forms:'表单组件',notices:'通知中心',logs:'操作日志',settings:'站点设置'};
+
+function cur(){
+  const raw = location.hash.replace(/^#\/?/,'');
+  const p = raw.split('/');
+  return {role:p[0]||'', view:p[1]||''};
+}
+function go(role, view){ location.hash = '#/'+role+'/'+view; }
+function unread(){ return DB.notices.filter(n=>!n.read).length; }
+function visibleNotices(){ return DB.notices.filter(n=>n.target==='all'||n.target===(DB.session&&DB.session.role)); }
+
+/* ================= 登录 ================= */
+function renderLogin(){
+  $('#app').innerHTML =
+  '<div class="login-wrap"><div class="login">'+
+    '<div class="top"><span>CONSOLE / LOGIN</span><span>NO. 001</span></div>'+
+    '<div class="body">'+
+      '<h1><span class="mark"></span>涛子控制台</h1>'+
+      '<div class="en">GENERAL ADMIN TEMPLATE</div>'+
+      '<p class="hint" style="margin:14px 0 18px">通用后台模板 · 纯前端演示版<br>数据保存在浏览器本地，可随时重置。</p>'+
+      '<form data-form="login">'+
+        '<div class="field"><label>账号 USERNAME</label><input name="user" value="admin" autocomplete="off"></div>'+
+        '<div class="field"><label>密码 PASSWORD</label><input name="pwd" type="password" value="123456"></div>'+
+        '<div class="err" id="loginErr"></div>'+
+        '<button class="btn primary" type="submit" style="width:100%;margin-top:6px">登录</button>'+
+      '</form>'+
+      '<div class="demo">'+
+        '<div class="hint" style="margin-bottom:8px">演示账号（密码统一 123456）：</div>'+
+        '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
+          '<button class="btn small" data-action="fill" data-user="admin">填入管理员</button>'+
+          '<button class="btn small" data-action="fill" data-user="user">填入普通用户</button>'+
+          '<a class="btn small" href="index.html">站点首页</a>'+
+        '</div>'+
+      '</div>'+
+    '</div></div></div>';
+}
+function doLogin(user, pwd){
+  if(pwd !== '123456') return {ok:false,msg:'密码不正确（演示密码 123456）'};
+  if(user==='admin') DB.session={user:'admin',role:'admin',name:'站点管理员'};
+  else if(user==='user') DB.session={user:'user',role:'client',name:(DB.profile&&DB.profile.name)||'林小满'};
+  else return {ok:false,msg:'账号不存在，请输入 admin 或 user'};
+  save(); addLog('登录','进入'+(DB.session.role==='admin'?'后台':'客户端')+'面板');
+  go(DB.session.role, DB.session.role==='admin'?'dashboard':'home');
+  return {ok:true};
+}
+function doLogout(){ addLog('退出','退出登录'); DB.session=null; save(); location.hash=''; }
+
+/* ================= 框架 ================= */
+function renderShell(role, view){
+  const s=DB.session, isAdmin=role==='admin';
+  const nav = MENU[role].map(g=>
+    '<div class="nav-group">'+esc(g.g)+'</div>'+
+    g.items.map(it=>{
+      const badge = it.v==='notices'||it.v==='mynotices' ? (unread()?'<span class="dot">'+unread()+'</span>':'') : '';
+      return '<button class="nav-item'+(it.v===view?' cur':'')+'" data-action="nav" data-role="'+role+'" data-view="'+it.v+'"><span class="ic">'+it.i+'</span>'+esc(it.t)+badge+'</button>';
+    }).join('')
+  ).join('');
+  $('#app').innerHTML =
+  '<div class="shell">'+
+    '<aside class="sidebar" id="sidebar">'+
+      '<div class="brand"><b>'+esc(DB.settings.siteName)+'</b><span>CONSOLE v1.2</span></div>'+
+      nav+
+      '<div class="side-foot">DEMO / LOCAL STORAGE<br>admin · 后台面板<br>user · 客户端面板</div>'+
+    '</aside>'+
+    '<div class="main-col">'+
+      '<div class="topbar">'+
+        '<button class="btn small ghost burger" data-action="burger">☰ 菜单</button>'+
+        '<span class="crumb">'+esc(isAdmin?'后台面板':'客户端面板')+' / <b>'+esc(TITLES_MAP[view]||'')+'</b></span>'+
+        '<div class="top-right">'+
+          '<span class="who">'+esc(s? s.name : '')+' · '+esc(isAdmin?'ADMIN':'USER')+'</span>'+
+          (isAdmin?'<button class="btn small" data-action="preview">预览客户端</button>':(s.role==='admin'?'<button class="btn small" data-action="back-admin">返回后台</button>':''))+
+          '<a class="btn small" href="index.html">站点首页</a>'+
+          '<a class="btn small" href="fruit-match.html">玩游戏</a>'+
+          '<button class="btn small" data-action="logout">退出</button>'+
+        '</div>'+
+      '</div>'+
+      '<main class="main" id="view">'+renderView(view,role)+'</main>'+
+    '</div>'+
+  '</div>';
+}
+function render(){
+  const s=DB.session;
+  if(!s){ renderLogin(); return; }
+  const c=cur();
+  let role=c.role, view=c.view;
+  if(role!=='admin'&&role!=='client'){ role=s.role; view=role==='admin'?'dashboard':'home'; }
+  if(role==='admin'&&s.role!=='admin'){ toast('当前账号没有后台权限'); role='client'; view='home'; }
+  if(!TITLES_MAP[view]) view = role==='admin'?'dashboard':'home';
+  if(!MENU[role].some(g=>g.items.some(i=>i.v===view))) view = role==='admin'?'dashboard':'home';
+  renderShell(role,view);
+  applyAccent();
+}
+function applyAccent(){
+  try{
+    document.documentElement.style.setProperty('--red', DB.settings.accent||'#d93a2b');
+    if(document.body) document.body.classList.toggle('compact', !!DB.settings.compact);
+  }catch(e){}
+}
+
+/* ================= 表格组件 ================= */
+const FORMS = {
+  users:[
+    {k:'name',l:'姓名',t:'text',req:true},{k:'email',l:'邮箱',t:'email',req:true},
+    {k:'role',l:'角色',t:'select',opts:ROLES},{k:'dept',l:'部门',t:'select',opts:DEPTS},
+    {k:'status',l:'状态',t:'select',opts:['启用','停用']}
+  ],
+  records:[
+    {k:'title',l:'标题',t:'text',req:true},{k:'cat',l:'分类',t:'select',opts:CATS},
+    {k:'owner',l:'负责人',t:'text',req:true},{k:'amount',l:'金额',t:'number',req:true},
+    {k:'status',l:'状态',t:'select',opts:STS},{k:'date',l:'日期',t:'date'}
+  ]
+};
+const TABLES = {
+  users:{cols:[{k:'id',l:'ID',num:1},{k:'name',l:'姓名'},{k:'email',l:'邮箱'},{k:'role',l:'角色'},{k:'dept',l:'部门'},{k:'status',l:'状态',badge:1},{k:'created',l:'创建日期'}],get:()=>DB.users,set:v=>DB.users=v,form:FORMS.users},
+  records:{cols:[{k:'id',l:'ID',num:1},{k:'title',l:'标题'},{k:'cat',l:'分类'},{k:'owner',l:'负责人'},{k:'amount',l:'金额',num:1,money:1},{k:'status',l:'状态',badge:1},{k:'date',l:'日期'}],get:()=>DB.records,set:v=>DB.records=v,form:FORMS.records},
+  logs:{cols:[{k:'id',l:'ID',num:1},{k:'time',l:'时间'},{k:'actor',l:'操作人'},{k:'action',l:'动作',badge:1},{k:'detail',l:'详情'}],get:()=>DB.logs,readonly:true},
+  myrecords:{cols:[{k:'id',l:'ID',num:1},{k:'title',l:'标题'},{k:'cat',l:'分类'},{k:'amount',l:'金额',num:1,money:1},{k:'status',l:'状态',badge:1},{k:'date',l:'日期'}],get:()=>DB.records.filter(r=>r.owner===(DB.profile&&DB.profile.name)),readonly:true}
+};
+const TS = {};
+function ts(v){ return TS[v] || (TS[v]={q:'',page:1,sort:'id',dir:1,sel:new Set()}); }
+function badgeHTML(v){
+  const cls = v==='启用'||v==='已完成'||v==='登录'||v==='on' ? 'on' :
+              (v==='停用'||v==='已驳回' ? 'off' : (v==='处理中'||v==='待审核' ? 'warn':''));
+  return '<span class="tag '+cls+'">'+esc(v)+'</span>';
+}
+function tableRows(t){
+  const s=ts(t), cfg=TABLES[t];
+  let rows=cfg.get().slice();
+  if(s.q) rows=rows.filter(r=>cfg.cols.some(c=>String(r[c.k]==null?'':r[c.k]).toLowerCase().indexOf(s.q.toLowerCase())>=0));
+  rows.sort((a,b)=>{
+    const x=a[s.sort],y=b[s.sort];
+    const r = (typeof x==='number'&&typeof y==='number') ? x-y : String(x==null?'':x).localeCompare(String(y==null?'':y),'zh-CN');
+    return r*s.dir;
+  });
+  const size=Math.max(1,Number(DB.settings.pageSize)||8);
+  const pages=Math.max(1,Math.ceil(rows.length/size));
+  if(s.page>pages) s.page=pages;
+  return {rows:rows.slice((s.page-1)*size,s.page*size),total:rows.length,pages:pages,size:size};
+}
+function tableView(t, opts){
+  opts=opts||{};
+  const cfg=TABLES[t], s=ts(t), r=tableRows(t);
+  const head='<tr>'+(cfg.readonly?'':'<th style="width:30px"><input type="checkbox" class="rowchk" data-change="all-sel" data-table="'+t+'"></th>')+
+    cfg.cols.map(c=>'<th class="sortable'+(c.num?' num':'')+'" data-action="sort" data-table="'+t+'" data-key="'+c.k+'">'+esc(c.l)+(s.sort===c.k?(s.dir>0?' ↑':' ↓'):'')+'</th>').join('')+
+    (cfg.readonly?'':'<th class="act">操作</th>')+'</tr>';
+  const body = r.rows.length? r.rows.map(row=>
+    '<tr>'+(cfg.readonly?'':'<td><input type="checkbox" class="rowchk" data-change="row-sel" data-table="'+t+'" data-id="'+row.id+'"'+(s.sel.has(String(row.id))?' checked':'')+'></td>')+
+    cfg.cols.map(c=>'<td class="'+(c.num?'num':'')+'">'+(c.badge?badgeHTML(row[c.k]):(c.money?esc(money(row[c.k])):esc(row[c.k])))+'</td>').join('')+
+    (cfg.readonly?'':'<td class="act"><button class="btn small" data-action="edit" data-table="'+t+'" data-id="'+row.id+'">编辑</button> <button class="btn small" data-action="del" data-table="'+t+'" data-id="'+row.id+'">删除</button></td>')+'</tr>'
+  ).join('') : '<tr><td colspan="'+(cfg.cols.length+2)+'" class="empty">没有符合条件的记录</td></tr>';
+  const tools='<div class="toolbar">'+
+    '<input class="search" placeholder="搜索…" value="'+esc(s.q)+'" data-input="q" data-table="'+t+'">'+
+    '<span class="hint">共 '+r.total+' 条</span>'+
+    (cfg.readonly?'':'<button class="btn small" data-action="add" data-table="'+t+'">+ 新增</button>')+
+    '<button class="btn small" data-action="export" data-table="'+t+'">导出 CSV</button>'+
+    (cfg.readonly?'':'<button class="btn small" data-action="bulk-del" data-table="'+t+'">删除所选'+(s.sel.size?' ('+s.sel.size+')':'')+'</button>')+
+    '</div>';
+  return '<div class="card"><div class="card-h"><h3>'+esc(opts.title||'数据列表')+'</h3>'+tools+'</div>'+
+    '<div class="tbl-wrap"><table><thead>'+head+'</thead><tbody>'+body+'</tbody></table></div>'+
+    '<div class="pager"><span class="info">第 '+s.page+' / '+r.pages+' 页 · 每页 '+r.size+' 条</span>'+
+    '<button class="btn small" data-action="page" data-table="'+t+'" data-delta="-1"'+(s.page<=1?' disabled':'')+'>上一页</button>'+
+    '<button class="btn small" data-action="page" data-table="'+t+'" data-delta="1"'+(s.page>=r.pages?' disabled':'')+'>下一页</button></div></div>';
+}
+function exportCSV(t){
+  const cfg=TABLES[t], rows=tableRows(t).rows;
+  const head=cfg.cols.map(c=>'"'+c.l+'"').join(',');
+  const body=rows.map(r=>cfg.cols.map(c=>'"'+String(r[c.k]==null?'':r[c.k]).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const text='\ufeff'+head+'\n'+body;
+  try{
+    const blob=new Blob([text],{type:'text/csv;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+    a.download=t+'-'+stamp().slice(0,10)+'.csv'; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+    toast('已导出 '+rows.length+' 条记录'); addLog('导出','导出 '+t+' 数据');
+  }catch(e){ toast('当前环境不支持文件下载'); }
+}
+function saveForm(t,id,vals){
+  const cfg=TABLES[t]; if(!cfg||cfg.readonly) return {ok:false,msg:'该表不可编辑'};
+  for(const f of cfg.form){ if(f.req && !String(vals[f.k]||'').trim()) return {ok:false,msg:'请填写「'+f.l+'」'}; }
+  if(t==='records'){
+    const n=Number(vals.amount);
+    if(!Number.isFinite(n)||n<0) return {ok:false,msg:'金额必须是不小于 0 的数字'};
+    vals.amount=n;
+  }
+  if(t==='users' && vals.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(vals.email)) return {ok:false,msg:'邮箱格式不正确'};
+  const arr=cfg.get();
+  if(id){
+    const row=arr.find(r=>String(r.id)===String(id));
+    if(!row) return {ok:false,msg:'记录不存在'};
+    Object.assign(row,vals);
+  }else{
+    const row=Object.assign({id:nextId()},vals);
+    if(t==='users'&&!row.created) row.created=stamp().slice(0,10);
+    if(t==='records'&&!row.date) row.date=stamp().slice(0,10);
+    arr.unshift(row);
+  }
+  save(); addLog(id?'编辑':'新增', t+' · '+(vals.title||vals.name||('#'+id||'')) );
+  return {ok:true};
+}
+function deleteRows(t, ids){
+  const cfg=TABLES[t]; if(!cfg||cfg.readonly) return 0;
+  const set=new Set(ids.map(String));
+  const before=cfg.get().length;
+  cfg.set(cfg.get().filter(r=>!set.has(String(r.id))));
+  ts(t).sel.clear(); save();
+  const n=before-cfg.get().length;
+  if(n) addLog('删除', t+' · 删除 '+n+' 条');
+  return n;
+}
+function openForm(t,id){
+  const cfg=TABLES[t]; if(!cfg||cfg.readonly) return;
+  const row = id ? cfg.get().find(r=>String(r.id)===String(id)) : {};
+  if(!row) return;
+  const fields=cfg.form.map(f=>{
+    const v=row[f.k]==null?'':row[f.k];
+    let ctrl;
+    if(f.t==='select') ctrl='<select name="'+f.k+'">'+f.opts.map(o=>'<option'+(String(o)===String(v)?' selected':'')+'>'+esc(o)+'</option>').join('')+'</select>';
+    else ctrl='<input type="'+f.t+'" name="'+f.k+'" value="'+esc(v)+'">';
+    return '<div class="field"><label>'+esc(f.l)+(f.req?' <span class="req">*</span>':'')+'</label>'+ctrl+'</div>';
+  }).join('');
+  modal((id?'编辑':'新增')+' · '+TITLES_MAP[t],
+    '<form data-form="'+t+'" data-id="'+esc(id||'')+'" id="editForm">'+fields+'<div class="err" id="formErr"></div></form>',
+    '<button class="btn" data-action="modal-close">取消</button><button class="btn primary" data-action="submit-form">保存</button>');
+}
+
+/* ================= 图表 ================= */
+const TREND=[38,52,44,66,58,74,81];
+const BARS=[12,19,15,27,23,31,36];
+const DAYS=['周一','周二','周三','周四','周五','周六','周日'];
+function svgLine(vals){
+  const W=560,H=170,pad=28, max=Math.max.apply(null,vals)*1.15||1;
+  const pts=vals.map((v,i)=>[pad+i*(W-2*pad)/(vals.length-1), H-pad-(v/max)*(H-2*pad)]);
+  const line=pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+  const grid=[0,.25,.5,.75,1].map(f=>'<line x1="'+pad+'" y1="'+(pad+f*(H-2*pad))+'" x2="'+(W-pad)+'" y2="'+(pad+f*(H-2*pad))+'" stroke="#e2d6ba" stroke-width="1"/>').join('');
+  const dots=pts.map((p,i)=>'<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="3.5" fill="var(--red)" stroke="var(--ink)" stroke-width="1.5"><title>'+DAYS[i]+'：'+vals[i]+'</title></circle>').join('');
+  return '<svg class="chart" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" role="img" aria-label="近七日活跃趋势">'+grid+
+    '<polyline points="'+line+'" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"/>'+dots+
+    DAYS.map((d,i)=>'<text x="'+pts[i][0].toFixed(1)+'" y="'+(H-6)+'" font-size="10" font-family="monospace" text-anchor="middle" fill="#6b6252">'+d+'</text>').join('')+'</svg>';
+}
+function svgBars(vals){
+  const W=560,H=170,pad=28,max=Math.max.apply(null,vals)*1.15||1;
+  const bw=(W-2*pad)/vals.length*0.55, gap=(W-2*pad)/vals.length;
+  return '<svg class="chart" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" role="img" aria-label="近七日新增柱状图">'+
+    '<line x1="'+pad+'" y1="'+(H-pad)+'" x2="'+(W-pad)+'" y2="'+(H-pad)+'" stroke="var(--ink)" stroke-width="2"/>'+
+    vals.map((v,i)=>{
+      const h=(v/max)*(H-2*pad), x=pad+i*gap+(gap-bw)/2, y=H-pad-h;
+      return '<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+h.toFixed(1)+'" fill="'+(i===vals.length-1?'var(--red)':'#efe4c8')+'" stroke="var(--ink)" stroke-width="1.5"><title>'+DAYS[i]+'：'+v+'</title></rect>'+
+        '<text x="'+(x+bw/2).toFixed(1)+'" y="'+(H-8)+'" font-size="10" font-family="monospace" text-anchor="middle" fill="#6b6252">'+DAYS[i]+'</text>';
+    }).join('')+'</svg>';
+}
+
+/* ================= 视图 ================= */
+const VIEWS={};
+VIEWS.dashboard=()=>{
+  const stats=[
+    {l:'TOTAL USERS',n:DB.users.length,s:'注册用户总数',c:'red'},
+    {l:'RECORDS',n:DB.records.length,s:'业务记录总数'},
+    {l:'PENDING',n:DB.records.filter(r=>r.status==='待审核'||r.status==='处理中').length,s:'待处理记录'},
+    {l:'ACTIVE RATE',n:'76.4%',s:'近七日活跃率'}
+  ];
+  const recent=DB.logs.slice(0,5).map(l=>'<div class="list-row"><span class="t">'+esc(l.time)+'</span><span>'+esc(l.actor)+' · '+esc(l.action)+' · '+esc(l.detail)+'</span></div>').join('')||'<div class="empty">暂无操作记录</div>';
+  return '<div class="page-h"><h2>仪表盘</h2><p>OVERVIEW / 站点数据总览</p></div>'+
+    '<div class="grid g4" style="margin-bottom:14px">'+stats.map(s=>'<div class="card stat"><div class="lb">'+s.l+'</div><div class="num '+(s.c||'')+'">'+esc(s.n)+'</div><div class="sub">'+esc(s.s)+'</div></div>').join('')+'</div>'+
+    '<div class="grid g21" style="margin-bottom:14px">'+
+      '<div class="card"><div class="card-h"><h3>活跃趋势 / 近七日</h3><span class="hint">ACTIVE USERS</span></div><div class="card-b">'+svgLine(TREND)+'</div></div>'+
+      '<div class="card"><div class="card-h"><h3>新增记录 / 近七日</h3><span class="hint">NEW RECORDS</span></div><div class="card-b">'+svgBars(BARS)+'</div></div>'+
+    '</div>'+
+    '<div class="grid g2">'+
+      '<div class="card"><div class="card-h"><h3>最近操作</h3><button class="btn small" data-action="nav" data-role="admin" data-view="logs">全部日志</button></div><div class="card-b">'+recent+'</div></div>'+
+      '<div class="card"><div class="card-h"><h3>快捷入口</h3><span class="hint">QUICK ACTIONS</span></div><div class="card-b quick">'+
+        '<button class="btn" data-action="add" data-table="users">+ 新增用户</button>'+
+        '<button class="btn" data-action="add" data-table="records">+ 新增记录</button>'+
+        '<button class="btn" data-action="nav" data-role="admin" data-view="roles">配置权限</button>'+
+        '<button class="btn" data-action="export" data-table="records">导出数据</button>'+
+        '<button class="btn" data-action="nav" data-role="admin" data-view="settings">站点设置</button>'+
+      '</div></div>'+
+    '</div>';
+};
+VIEWS.users=()=>'<div class="page-h"><h2>用户管理</h2><p>USERS / 搜索、排序、增删改查与批量操作</p></div>'+tableView('users',{title:'用户列表'});
+VIEWS.records=()=>'<div class="page-h"><h2>数据记录</h2><p>RECORDS / 通用业务数据表格演示</p></div>'+tableView('records',{title:'记录列表'});
+VIEWS.logs=()=>'<div class="page-h"><h2>操作日志</h2><p>AUDIT LOG / 自动记录登录与数据变更</p></div>'+tableView('logs',{title:'日志列表'});
+VIEWS.myrecords=()=>'<div class="page-h"><h2>我的记录</h2><p>MY RECORDS / 只读视图，仅显示归属当前用户的记录</p></div>'+tableView('myrecords',{title:'记录列表'});
+VIEWS.roles=()=>{
+  const keys=Object.keys(PERM_LABELS);
+  const head='<tr><th>权限模块</th>'+DB.roles.map(r=>'<th>'+esc(r.name)+'</th>').join('')+'</tr>';
+  const body=keys.map(k=>'<tr><td><b>'+esc(PERM_LABELS[k])+'</b><div class="hint">'+k+'</div></td>'+
+    DB.roles.map(r=>'<td><input type="checkbox" class="rowchk" data-change="perm" data-role-id="'+r.id+'" data-perm="'+k+'"'+(r.perms[k]?' checked':'')+(r.id===1?' disabled':'')+'></td>').join('')+'</tr>').join('');
+  const cards=DB.roles.map(r=>'<div class="card stat"><div class="lb">'+esc(r.name)+'</div><div class="num" style="font-size:19px">'+Object.values(r.perms).filter(Boolean).length+' / '+keys.length+'</div><div class="sub">'+esc(r.desc)+'</div></div>').join('');
+  return '<div class="page-h"><h2>角色权限</h2><p>ROLES & PERMISSIONS / 勾选后立即保存到本地</p></div>'+
+    '<div class="grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px">'+cards+'</div>'+
+    '<div class="card"><div class="card-h"><h3>权限矩阵</h3><span class="hint">超级管理员默认拥有全部权限</span></div>'+
+    '<div class="tbl-wrap"><table class="matrix"><thead>'+head+'</thead><tbody>'+body+'</tbody></table></div></div>';
+};
+VIEWS.forms=()=>'<div class="page-h"><h2>表单组件</h2><p>FORM ELEMENTS / 常见控件与校验演示</p></div>'+
+  '<div class="grid g2"><div class="card"><div class="card-h"><h3>示例表单</h3><span class="hint">DEMO FORM</span></div><div class="card-b">'+
+    '<form data-form="demo" id="demoForm">'+
+      '<div class="field"><label>项目名称 <span class="req">*</span></label><input name="title" placeholder="请输入名称"></div>'+
+      '<div class="field"><label>类型</label><select name="type"><option>标准</option><option>加急</option><option>内部</option></select></div>'+
+      '<div class="field"><label>预算</label><input name="budget" type="number" value="1200"></div>'+
+      '<div class="field"><label>截止日期</label><input name="date" type="date" value="2026-11-30"></div>'+
+      '<div class="field"><label>备注</label><textarea name="note" placeholder="补充说明"></textarea></div>'+
+      '<div class="field"><label class="switch"><input type="checkbox" name="notify" checked> 提交后通知我</label></div>'+
+      '<div class="err" id="demoErr"></div>'+
+      '<button class="btn primary" type="submit">提交</button>'+
+    '</form></div></div>'+
+    '<div class="card"><div class="card-h"><h3>控件说明</h3><span class="hint">SPEC</span></div><div class="card-b">'+
+      '<div class="list-row"><span class="t">01</span><span>文本 / 邮箱 / 数字 / 日期输入，聚焦时红色描边</span></div>'+
+      '<div class="list-row"><span class="t">02</span><span>下拉选择、多行文本、复选框开关</span></div>'+
+      '<div class="list-row"><span class="t">03</span><span>必填校验：项目名称为空会阻止提交并提示</span></div>'+
+      '<div class="list-row"><span class="t">04</span><span>提交结果写入操作日志，可在「操作日志」查看</span></div>'+
+      '<div class="list-row"><span class="t">05</span><span>所有控件均为原生 HTML，无第三方依赖</span></div>'+
+      '<div style="margin-top:14px" class="quick"><button class="btn" data-action="add" data-table="users">打开新增用户弹窗</button><button class="btn" data-action="add" data-table="records">打开新增记录弹窗</button></div>'+
+    '</div></div></div>';
+VIEWS.notices=()=>{
+  const list=visibleNotices().map(n=>'<div class="notice'+(n.read?'':' unread')+'">'+
+    '<span class="tag '+(n.read?'off':'red')+'">'+(n.read?'已读':'未读')+'</span>'+
+    '<div class="bd"><div class="tt">'+esc(n.title)+'</div><div class="tx">'+esc(n.body)+'</div><div class="hint" style="margin-top:6px">'+esc(n.time)+'</div></div>'+
+    (n.read?'':'<button class="btn small" data-action="notice-read" data-id="'+n.id+'">标记已读</button>')+'</div>').join('')||'<div class="empty">暂无消息</div>';
+  return '<div class="page-h"><h2>通知中心</h2><p>NOTICES / 未读 '+unread()+' 条</p></div>'+
+    '<div class="card"><div class="card-h"><h3>消息列表</h3><div class="toolbar">'+
+    '<button class="btn small" data-action="notice-all">全部标记已读</button>'+
+    '<button class="btn small" data-action="notice-clear">清空消息</button></div></div>'+list+'</div>';
+};
+VIEWS.mynotices=()=>{
+  const list=visibleNotices().map(n=>'<div class="notice'+(n.read?'':' unread')+'">'+
+    '<span class="tag '+(n.read?'off':'red')+'">'+(n.read?'已读':'未读')+'</span>'+
+    '<div class="bd"><div class="tt">'+esc(n.title)+'</div><div class="tx">'+esc(n.body)+'</div><div class="hint" style="margin-top:6px">'+esc(n.time)+'</div></div></div>').join('')||'<div class="empty">暂无消息</div>';
+  return '<div class="page-h"><h2>我的消息</h2><p>INBOX / 站点公告与通知</p></div><div class="card"><div class="card-h"><h3>收件箱</h3><span class="hint">未读 '+unread()+' 条</span></div>'+list+'</div>';
+};
+VIEWS.settings=()=>'<div class="page-h"><h2>站点设置</h2><p>SETTINGS / 修改后立即保存并生效</p></div>'+
+  '<div class="grid g2"><div class="card"><div class="card-h"><h3>基本设置</h3><span class="hint">GENERAL</span></div><div class="card-b">'+
+    '<form data-form="settings" id="settingsForm">'+
+      '<div class="field"><label>站点名称</label><input name="siteName" value="'+esc(DB.settings.siteName)+'"></div>'+
+      '<div class="field"><label>列表每页条数</label><select name="pageSize">'+[5,8,10,20].map(n=>'<option'+(Number(DB.settings.pageSize)===n?' selected':'')+'>'+n+'</option>').join('')+'</select></div>'+
+      '<div class="field"><label>强调色</label><select name="accent">'+
+        [['#d93a2b','番茄红'],['#2f7d4f','西瓜绿'],['#3b5bdb','靛蓝'],['#1c1a17','墨黑']].map(c=>'<option value="'+c[0]+'"'+(DB.settings.accent===c[0]?' selected':'')+'>'+c[1]+'</option>').join('')+'</select></div>'+
+      '<div class="field"><label class="switch"><input type="checkbox" name="compact"'+(DB.settings.compact?' checked':'')+'> 紧凑模式（缩小卡片间距）</label></div>'+
+      '<div class="err" id="settingsErr"></div><button class="btn primary" type="submit">保存设置</button>'+
+    '</form></div></div>'+
+    '<div class="card"><div class="card-h"><h3>演示数据</h3><span class="hint">LOCAL STORAGE</span></div><div class="card-b">'+
+      '<p class="hint" style="margin-top:0">所有数据仅保存在当前浏览器的 localStorage 中，不会上传到任何服务器。重置后会恢复到初始演示数据。</p>'+
+      '<div class="quick" style="margin-top:14px"><button class="btn" data-action="reset">重置演示数据</button><button class="btn" data-action="logout">退出登录</button></div>'+
+      '<div class="list-row" style="margin-top:16px"><span class="t">用户</span><span>'+DB.users.length+' 条</span></div>'+
+      '<div class="list-row"><span class="t">记录</span><span>'+DB.records.length+' 条</span></div>'+
+      '<div class="list-row"><span class="t">日志</span><span>'+DB.logs.length+' 条</span></div>'+
+    '</div></div></div>';
+VIEWS.home=()=>{
+  const mine=DB.records.filter(r=>r.owner===DB.profile.name);
+  const stats=[{l:'MY RECORDS',n:mine.length,s:'我的记录'},{l:'UNREAD',n:unread(),s:'未读消息',c:'red'},{l:'PROFILE',n:'100%',s:'资料完整度'}];
+  const news=visibleNotices().slice(0,3).map(n=>'<div class="list-row"><span class="t">'+esc(n.time.slice(5))+'</span><span>'+esc(n.title)+'</span></div>').join('')||'<div class="empty">暂无公告</div>';
+  return '<div class="page-h"><h2>你好，'+esc(DB.profile.name)+'</h2><p>CLIENT PORTAL / 客户端面板</p></div>'+
+    '<div class="grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px">'+stats.map(s=>'<div class="card stat"><div class="lb">'+s.l+'</div><div class="num '+(s.c||'')+'">'+esc(s.n)+'</div><div class="sub">'+esc(s.s)+'</div></div>').join('')+'</div>'+
+    '<div class="grid g2"><div class="card"><div class="card-h"><h3>站点公告</h3><button class="btn small" data-action="nav" data-role="client" data-view="mynotices">查看全部</button></div><div class="card-b">'+news+'</div></div>'+
+    '<div class="card"><div class="card-h"><h3>快捷入口</h3><span class="hint">SHORTCUTS</span></div><div class="card-b quick">'+
+      '<button class="btn" data-action="nav" data-role="client" data-view="profile">编辑资料</button>'+
+      '<button class="btn" data-action="nav" data-role="client" data-view="myrecords">查看记录</button>'+
+      '<button class="btn" data-action="nav" data-role="client" data-view="help">帮助中心</button>'+
+    '</div></div></div>';
+};
+VIEWS.profile=()=>'<div class="page-h"><h2>我的资料</h2><p>PROFILE / 修改后即时保存</p></div>'+
+  '<div class="card" style="max-width:560px"><div class="card-h"><h3>个人信息</h3><span class="hint">ACCOUNT</span></div><div class="card-b">'+
+    '<form data-form="profile" id="profileForm">'+
+      '<div class="field"><label>姓名 <span class="req">*</span></label><input name="name" value="'+esc(DB.profile.name)+'"></div>'+
+      '<div class="field"><label>邮箱</label><input name="email" value="'+esc(DB.profile.email)+'"></div>'+
+      '<div class="field"><label>手机号</label><input name="phone" value="'+esc(DB.profile.phone)+'"></div>'+
+      '<div class="field"><label>个人简介</label><textarea name="bio">'+esc(DB.profile.bio)+'</textarea></div>'+
+      '<div class="err" id="profileErr"></div><button class="btn primary" type="submit">保存资料</button>'+
+    '</form></div></div>';
+VIEWS.help=()=>'<div class="page-h"><h2>帮助与偏好</h2><p>HELP & PREFERENCES</p></div>'+
+  '<div class="grid g2"><div class="card"><div class="card-h"><h3>常见问题</h3><span class="hint">FAQ</span></div><div class="card-b">'+
+    '<details class="faq" open><summary>数据会上传到服务器吗？</summary><p>不会。这是纯前端演示模板，所有内容保存在浏览器 localStorage，清除浏览器数据即会丢失。</p></details>'+
+    '<details class="faq"><summary>如何切换后台与客户端？</summary><p>退出后用 admin 登录进入后台，用 user 登录进入客户端；管理员也可以点右上角「预览客户端」。</p></details>'+
+    '<details class="faq"><summary>为什么改了数据刷新后还在？</summary><p>每次修改都会写入 localStorage。想恢复初始状态，到后台「站点设置 → 重置演示数据」。</p></details>'+
+    '<details class="faq"><summary>导出的 CSV 用什么打开？</summary><p>Excel、WPS 或任意表格软件均可，文件已带 UTF-8 BOM，中文不会乱码。</p></details>'+
+  '</div></div>'+
+  '<div class="card"><div class="card-h"><h3>我的偏好</h3><span class="hint">PREFERENCES</span></div><div class="card-b">'+
+    '<div class="field"><label class="switch"><input type="checkbox" data-change="pref" data-key="news"'+((DB.prefs&&DB.prefs.news)?' checked':'')+'> 接收站点公告</label></div>'+
+    '<div class="field"><label class="switch"><input type="checkbox" data-change="pref" data-key="digest"'+((DB.prefs&&DB.prefs.digest)?' checked':'')+'> 每周汇总邮件</label></div>'+
+    '<div class="field"><label class="switch"><input type="checkbox" data-change="pref" data-key="compact"'+((DB.prefs&&DB.prefs.compact)?' checked':'')+'> 紧凑列表（即时生效）</label></div>'+
+    '<p class="hint">偏好切换会写入操作日志，用于演示事件记录。</p>'+
+  '</div></div></div>';
+
+function renderView(v,role){ return (VIEWS[v]||VIEWS.dashboard)(); }
+
+/* ================= 事件 ================= */
+function formData(form){
+  const o={};
+  try{
+    const fd=new FormData(form);
+    fd.forEach((v,k)=>{ o[k]=typeof v==='string'?v.trim():v; });
+  }catch(e){
+    const els=form.querySelectorAll('input,select,textarea');
+    for(const el of els) o[el.name]=el.value;
+  }
+  return o;
+}
+function handleClick(e){
+  const el=e.target.closest('[data-action]'); if(!el) return;
+  const a=el.dataset.action, t=el.dataset.table, id=el.dataset.id;
+  if(a==='mask'){ if(e.target===el) closeModal(); return; }
+  if(a==='modal-close'){ closeModal(); return; }
+  if(a==='fill'){
+    const f=document.querySelector('[data-form="login"]');
+    if(f){ f.user.value=el.dataset.user; f.pwd.value='123456'; }
+    return;
+  }
+  if(a==='logout'){ doLogout(); render(); return; }
+  if(a==='burger'){ const s=$('#sidebar'); if(s) s.classList.toggle('open'); return; }
+  if(a==='preview'){ go('client','home'); return; }
+  if(a==='back-admin'){ go('admin','dashboard'); return; }
+  if(a==='nav'){ go(el.dataset.role,el.dataset.view); const s=$('#sidebar'); if(s) s.classList.remove('open'); return; }
+  if(a==='sort'){ const s=ts(t); if(s.sort===el.dataset.key) s.dir*=-1; else { s.sort=el.dataset.key; s.dir=1; } render(); return; }
+  if(a==='page'){ const s=ts(t); s.page=Math.max(1,s.page+Number(el.dataset.delta)); render(); return; }
+  if(a==='add'){ openForm(t,null); return; }
+  if(a==='edit'){ openForm(t,id); return; }
+  if(a==='del'){ confirmBox('确认删除','确定删除这条记录吗？该操作不可撤销。',()=>{ const n=deleteRows(t,[id]); closeModal(); render(); toast(n?'已删除 1 条记录':'删除失败'); },'删除'); return; }
+  if(a==='bulk-del'){
+    const s=ts(t); if(!s.sel.size){ toast('请先勾选要删除的记录'); return; }
+    confirmBox('批量删除','确定删除选中的 '+s.sel.size+' 条记录吗？',()=>{ const n=deleteRows(t,[...s.sel]); closeModal(); render(); toast('已删除 '+n+' 条记录'); },'全部删除'); return;
+  }
+  if(a==='export'){ exportCSV(t); return; }
+  if(a==='notice-read'){ const n=DB.notices.find(x=>String(x.id)===String(id)); if(n){ n.read=true; save(); render(); } return; }
+  if(a==='notice-all'){ visibleNotices().forEach(n=>n.read=true); save(); addLog('消息','全部标记为已读'); render(); toast('已全部标记已读'); return; }
+  if(a==='notice-clear'){ confirmBox('清空消息','确定清空所有消息吗？',()=>{ DB.notices=[]; save(); addLog('消息','清空消息'); closeModal(); render(); toast('消息已清空'); },'清空'); return; }
+  if(a==='reset'){ confirmBox('重置演示数据','所有用户、记录、日志与设置都会恢复为初始状态，当前登录会退出。',()=>{ resetData(); closeModal(); render(); toast('已恢复初始演示数据'); },'重置'); return; }
+  if(a==='confirm-yes'){ const f=PENDING; PENDING=null; if(f) f(); return; }
+  if(a==='submit-form'){ const f=$('#editForm'); if(f) f.dispatchEvent(new Event('submit',{cancelable:true,bubbles:true})); return; }
+}
+function handleInput(e){
+  const el=e.target, a=el.dataset.input;
+  if(a==='q'){ const s=ts(el.dataset.table); s.q=el.value; s.page=1; const pos=el.selectionStart; render(); const n=document.querySelector('[data-input="q"][data-table="'+el.dataset.table+'"]'); if(n){ n.focus(); try{ n.setSelectionRange(pos,pos); }catch(err){} } }
+}
+function handleChange(e){
+  const el=e.target, a=el.dataset.change;
+  if(!a) return;
+  if(a==='row-sel'){ const s=ts(el.dataset.table); if(el.checked) s.sel.add(String(el.dataset.id)); else s.sel.delete(String(el.dataset.id)); render(); return; }
+  if(a==='all-sel'){ const s=ts(el.dataset.table), r=tableRows(el.dataset.table).rows; r.forEach(x=>el.checked?s.sel.add(String(x.id)):s.sel.delete(String(x.id))); render(); return; }
+  if(a==='perm'){
+    const r=DB.roles.find(x=>String(x.id)===String(el.dataset.roleId));
+    if(r&&r.id!==1){ r.perms[el.dataset.perm]=el.checked; save(); addLog('权限','修改「'+r.name+'」的 '+el.dataset.perm+' 权限'); render(); toast('权限已保存'); }
+    return;
+  }
+  if(a==='pref'){
+    const k=el.dataset.key;
+    if(!DB.prefs) DB.prefs={news:true,digest:false,compact:false};
+    DB.prefs[k]=el.checked;
+    if(k==='compact'){ DB.settings.compact=el.checked; applyAccent(); }
+    save(); addLog('偏好','切换偏好 '+k+' = '+(el.checked?'开':'关'));
+    toast('偏好已保存'); return;
+  }
+}
+function handleSubmit(e){
+  const form=e.target.closest('[data-form]'); if(!form) return;
+  e.preventDefault();
+  const t=form.dataset.form, vals=formData(form);
+  if(t==='login'){
+    const r=doLogin(vals.user,vals.pwd);
+    if(!r.ok){ const box=$('#loginErr'); if(box) box.textContent=r.msg; toast(r.msg); }
+    else render();
+    return;
+  }
+  if(t==='demo'){
+    if(!vals.title){ const box=$('#demoErr'); if(box) box.textContent='请填写项目名称'; toast('请填写项目名称'); return; }
+    addLog('表单','提交示例表单：'+vals.title); toast('提交成功：'+vals.title); form.reset(); return;
+  }
+  if(t==='profile'){
+    if(!vals.name){ const box=$('#profileErr'); if(box) box.textContent='请填写姓名'; return; }
+    const old=DB.profile.name;
+    Object.assign(DB.profile,vals);
+    if(old!==vals.name) DB.records.forEach(r=>{ if(r.owner===old) r.owner=vals.name; });
+    if(DB.session&&DB.session.role==='client') DB.session.name=vals.name;
+    save(); addLog('资料','更新个人资料'); toast('资料已保存'); render(); return;
+  }
+  if(t==='settings'){
+    DB.settings.siteName=vals.siteName||'涛子控制台';
+    DB.settings.pageSize=Number(vals.pageSize)||8;
+    DB.settings.accent=vals.accent||'#d93a2b';
+    DB.settings.compact=!!vals.compact;
+    if(!DB.prefs) DB.prefs={news:true,digest:false,compact:false};
+    DB.prefs.compact=DB.settings.compact;
+    save(); addLog('设置','修改站点设置'); applyAccent(); toast('设置已保存'); render(); return;
+  }
+  const r=saveForm(t,form.dataset.id,vals);
+  if(!r.ok){ const box=$('#formErr'); if(box) box.textContent=r.msg; toast(r.msg); return; }
+  closeModal(); render(); toast(form.dataset.id?'修改已保存':'新增成功');
+}
+document.addEventListener('click',handleClick);
+document.addEventListener('input',handleInput);
+document.addEventListener('change',handleChange);
+document.addEventListener('submit',handleSubmit);
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeModal(); const s=$('#sidebar'); if(s) s.classList.remove('open'); } });
+window.addEventListener('hashchange',render);
+
+/* ================= 启动 ================= */
+if(!location.hash && DB.session) location.hash='#/'+DB.session.role+'/'+(DB.session.role==='admin'?'dashboard':'home');
+render();
+
+/* 暴露给离线回归测试（不影响页面行为） */
+window.__console = {
+  get DB(){return DB;}, save, resetData, addLog, doLogin, doLogout,
+  saveForm, deleteRows, exportCSV, tableRows, ts, render, cur, seed,
+  setHash(h){ location.hash=h; render(); }
+};
+})();
+</script>
+</body>
+</html>
